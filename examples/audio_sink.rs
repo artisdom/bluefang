@@ -63,7 +63,7 @@ async fn main() -> anyhow::Result<()> {
 
     Hci::register_firmware_loader(RealTekFirmwareLoader::new("./firmware")).await;
 
-    let usb = UsbController::list(|info| info.vendor_id() == 0x2B89 || info.vendor_id() == 0x10D7)?
+    let usb = UsbController::list(|info| info.vendor_id() == 0x2B89 || info.vendor_id() == 0x10D7 || info.vendor_id() == 0x0A12)?
         .next()
         .context("failed to find device")?
         .claim()?;
@@ -305,10 +305,16 @@ pub struct AudioSession {
 
 impl AudioSession {
     pub fn new() -> anyhow::Result<Self> {
+        trace!("AudioSession new()");
+
         let host = default_host();
+        trace!("AudioSession default_host()");
+
         let device = host
             .default_output_device()
             .context("failed to find output device")?;
+
+        trace!("AudioSession default_output_device()");
 
         let config = device
             .supported_output_configs()?
@@ -317,6 +323,8 @@ impl AudioSession {
             .context("failed to find output config")?
             .with_max_sample_rate()
             .config();
+        // let config = device.default_output_config()?.config();
+
         trace!("selected output config: {:?}", config);
 
         let max_buffer_size = (config.sample_rate.0 * config.channels as u32) as usize;

@@ -60,7 +60,7 @@ impl Hci {
         debug!("HCI reset...");
         hci.reset().await?;
 
-        Self::try_load_firmware(&hci).await;
+        // Self::try_load_firmware(&hci).await;
 
         debug!("HCI version: {:?}", hci.read_local_version().await?);
 
